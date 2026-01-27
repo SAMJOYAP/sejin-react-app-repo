@@ -1,77 +1,49 @@
-<<<<<<< HEAD
-# React + TypeScript + Vite
+## Project Overview
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- 멀티 노드 Kubernetes 클러스터 구성
+- 애플리케이션 컨테이너화
+- 이미지 빌드 및 레지스트리 푸시 자동화
+- Kubernetes Deployment를 통한 롤링 업데이트
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Architecture & Flow
 
-## React Compiler
+### 전체 구성 흐름
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+![스크린샷 2026-01-27 19.39.25.png](attachment:edac945e-b953-4b24-be52-3e8a6ab6be92:스크린샷_2026-01-27_19.39.25.png)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## CI/CD Flow Detail
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. **코드 변경**
+   - React(Vite) 애플리케이션 소스 수정
+   - `main` 브랜치에 push 또는 태그(`v*`) 생성
+2. **CI (Build & Push)**
+   - GitHub Actions 워크플로우 트리거
+   - Dockerfile을 기반으로 이미지 빌드
+   - Docker Hub에 이미지 자동 push
+3. **CD (Deploy to Kubernetes)**
+   - Self-hosted Runner에서 `kubectl` 실행
+   - 기존 Deployment의 이미지 업데이트
+   - Kubernetes가 Rolling Update 수행
+4. **Service Exposure**
+   - Deployment → Pod 생성
+   - NodePort Service를 통해 외부 접근 가능
+   - 브라우저에서 React 애플리케이션 확인
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 구조
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-=======
-# sejin-cicd-project
->>>>>>> b033763f74c811febb0e2dd33e59fc2a747d1cd8
+- **Deployment 사용**
+  - Pod 자동 복구(Self-healing)
+  - 무중단 롤링 업데이트 지원
+  - Replica 확장 가능
+- **Nginx 기반 정적 서빙**
+  - React 빌드 결과물에 최적화
+  - 가볍고 안정적인 런타임
+- **Self-hosted GitHub Actions Runner**
+  - Kubernetes 클러스터 내부 접근 필요
+  - `kubectl`, Docker 데몬 직접 제어 가능
