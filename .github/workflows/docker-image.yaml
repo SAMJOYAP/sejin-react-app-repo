@@ -1,5 +1,4 @@
-name: Build and Push Docker Image
-
+name: Build, Push Docker Image & Deploy to Kubernetes
 on:
   push:
     branches:
@@ -8,19 +7,22 @@ on:
       - 'v*'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-push-deploy:
+    runs-on: self-hosted
 
     steps:
+      # 1) 소스 체크아웃
       - name: Checkout source
         uses: actions/checkout@v4
 
+      # 2) Docker Hub 로그인
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 3) Docker 이미지 빌드 & 푸시
       - name: Build and Push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -29,3 +31,19 @@ jobs:
           tags: |
             sej1991/my-react-vite:latest
             sej1991/my-react-vite:${{ github.ref_name }}
+
+      # 4) Kubernetes 배포
+      - name: Deploy to Kubernetes
+        run: |
+          echo "🔧 Using kubeconfig"
+          export KUBECONFIG=/etc/kubernetes/admin.conf
+
+          echo "🚀 Updating deployment image"
+          kubectl set image deployment/my-react \
+            my-react=sej1991/my-react-vite:${{ github.ref_name }}
+
+          echo "⏳ Waiting for rollout"
+          kubectl rollout status deployment/my-react
+
+          echo "📦 Current Pods"
+          kubectl get pods -o wide
