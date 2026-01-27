@@ -35,7 +35,7 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          export KUBECONFIG=/etc/kubernetes/admin.conf
+          export KUBECONFIG=/home/vagrant/.kube/config
           kubectl set image deployment/my-react my-react=sej1991/my-react-vite:${{ github.ref_name }}
           kubectl rollout status deployment/my-react
           kubectl get pods -o wide
