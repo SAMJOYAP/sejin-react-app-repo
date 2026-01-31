@@ -11,7 +11,7 @@ function App() {
   useEffect(() => {
     const fetchCheer = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/api/count');
+        const res = await axios.get('/api/count');
         setCount(res.data.count);
       } catch (error) {
         console.error('API 호출 실패:', error);
@@ -23,7 +23,7 @@ function App() {
 
   const handleCheer = async () => {
     try {
-      const res = await axios.post('http://localhost:3000/api/count');
+      const res = await axios.post('/api/count');
       setCount(res.data.count);
     } catch (error) {
       console.error('응원 실패:', error);
